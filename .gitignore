@@ -1,6 +1,8 @@
 # Source: https://github.com/github/gitignore
 build/
 dist/
+tests/testdest/
+
 
 # For uploading to pypi, contains secrets
 .pypirc
