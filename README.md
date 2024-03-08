@@ -4,6 +4,8 @@ MSICompiler is a tool to create MSI packages for Windows.
 It is a simple tool that uses a configuration file to create the MSI package. 
 It is written in Python and uses the `msilib` library to create the MSI package.
 
+## [Download](https://github.com/camratchford/MSICompiler/releases/download/0.1.0/MSICompiler.zip)
+
 ## Features
 
 - YAML-based configuration
