@@ -1,0 +1,41 @@
+[project]
+name = "MsiCompiler"
+requires-python = ">=3.10"
+version = "0.1.0"
+description = "MsiCompiler - It Compiles MSI packages"
+readme = "README.md"
+classifiers = [
+  "Development Status :: 1 - Testing",
+  "License :: OSI Approved :: MIT No Attribution License (MIT-0)",
+  "Environment :: Console",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dependencies = [
+    "click==8.1.7",
+    "colorama==0.4.6",
+    "PyYAML==6.0.1",
+]
+
+[project.license]
+text = "MIT"
+
+[[project.authors]]
+name = "Cam Ratchford"
+email = "camratchford@gmail.com"
+
+[project.urls]
+Homepage = "https://github.com/camratchford/MsiCompiler"
+Source = "https://github.com/camratchford/MsiCompiler"
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["msi_compiler"]
+
+[project.scripts]
+msicompiler = "msi_compiler.cli:run"
+

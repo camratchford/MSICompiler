@@ -1,0 +1,15 @@
+---
+source_folder: 'C:\Users\Cam\PycharmProjects\MSICompiler\tests\testpack'
+destination_folder: 'C:\Users\Cam\PycharmProjects\MSICompiler\tests\testdest'
+powershell_script: 'script.ps1'
+script_args:
+  - 1
+  - "2"
+msi_package_path: 'C:\Users\Cam\PycharmProjects\MSICompiler\tests\{package_name}_{package_version}.msi'
+package_name: 'TestPackage'
+package_version: '1.0.0'
+company: 'RatchfordConsulting'
+manufacturer: 'RatchfordManufacturing'
+contact_email: 'camratchford@gmail.com'
+webpage: 'https://support.ratchfordconsulting.com/'
+upgrade_code: '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
