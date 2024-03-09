@@ -1,11 +1,11 @@
 ---
-source_folder: 'C:\Users\Cam\PycharmProjects\MSICompiler\tests\testpack'
-destination_folder: 'C:\Users\Cam\PycharmProjects\MSICompiler\tests\testdest'
+source_folder: '.\fixtures\testpack'
+destination_folder: '.\outputs\testdest'
 powershell_script: 'script.ps1'
 script_args:
   - 1
   - "2"
-msi_package_path: 'C:\Users\Cam\PycharmProjects\MSICompiler\tests\{package_name}_{package_version}.msi'
+msi_package_path: '.\outputs\{package_name}_{package_version}.msi'
 package_name: 'TestPackage'
 package_version: '1.0.0'
 company: 'RatchfordConsulting'

@@ -78,7 +78,7 @@ msiexec /i /qn "C:\Users\Cam\MSICompiler\tests\TestPackage_1.0.0.msi" -log "inst
 > Feel free to submit a feature request as an issue
 
 - Uninstall actions
-- Testing
+- Logging / Better error handling
 - Additional script actions
 - Executable actions
   - DLLs
