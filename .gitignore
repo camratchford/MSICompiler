@@ -1,7 +1,7 @@
 # Source: https://github.com/github/gitignore
 build/
 dist/
-tests/testdest/
+tests/ouputs/
 
 
 # For uploading to pypi, contains secrets
@@ -256,3 +256,4 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+/tests/outputs/

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def calculate_size(source_dir: str):
-    """
+    r"""
     Returns a sum of the files contained within 'source_dir'
     :param source_dir:
     :return:
@@ -32,7 +32,7 @@ def add_feature(
         dir_obj: msilib.Directory,
         file_list: list[Path]
 ):
-    """
+    r"""
     Sets a 'Feature', which is used to assoicate with files in 'dir_obj'.
     Adds files in 'file_list' to the 'cab_obj' file, and associates the cab with 'dir_obj'.
     :param db:
@@ -67,7 +67,7 @@ def add_directory(
         cab_obj: msilib.CAB,
 
 ):
-    """
+    r"""
     Add a directory
     :param db: The MSI database
     :param cab_obj: A msilib.CAB object, unique to each entry in the Directory table
@@ -87,7 +87,7 @@ def add_directory(
 
 
 def set_target_dir(db, target_dir: str):
-    """
+    r"""
     Sets the TARGETDIR property, and adds the SetTargetDirAction to unpack the directory 'SourceDir' into 'target_dir'
     :param db: The MSI database
     :param target_dir: The directory in which the source directory will be placed as part of the 'INSTALL' action
@@ -115,7 +115,7 @@ def set_target_dir(db, target_dir: str):
 
 
 def add_powershell_script(db, script_name: str, script_args: list[str]):
-    """
+    r"""
     Add a CustomAction and assoicated Sequence to their respective tables.
     The action will execute 'script_name' with its arguments 'script_args' in powershell.
     :param db:
@@ -144,7 +144,7 @@ def add_powershell_script(db, script_name: str, script_args: list[str]):
 
 
 def create_msi(config: Config):
-    """
+    r"""
     Creates an MSI package using the parameters contained in the config object
     :param config: A Config object
     :return:

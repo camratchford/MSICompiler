@@ -23,6 +23,8 @@ It is written in Python and uses the `msilib` library to create the MSI package.
   - Custom actions (that aren't the one powershell script you specify)
   - Uninstall actions
 
+> See the Future Plans section for more features lacking in MSICompiler
+
 ## Usage
 
 To use MSICompiler, you need to create a configuration file.
@@ -70,3 +72,19 @@ msiexec /i /qn "C:\Users\Cam\MSICompiler\tests\TestPackage_1.0.0.msi" -log "inst
 # Assumes that the msi package is in the current directory
 ./TestPackage_1.0.0.msi
 ```
+
+## Future Plans
+
+> Feel free to submit a feature request as an issue
+
+- Uninstall actions
+- Logging / Better error handling
+- Additional script actions
+- Executable actions
+  - DLLs
+  - EXEs
+- Registry keys
+- Scheduled tasks
+- Services
+- Appending to the PATH environment variable
+- GUI
