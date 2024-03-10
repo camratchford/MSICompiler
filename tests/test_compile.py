@@ -9,13 +9,15 @@ from msi_compiler.compiler import (
     add_feature,
     add_directory,
     set_target_dir,
-    add_powershell_script
+    add_property
 )
+from msi_compiler.custom_actions import add_powershel_action, add_executable_action
 from msi_compiler.msilib_util import (
     get_feature,
     get_property,
     get_custom_action,
-    get_directory
+    get_directory,
+    get_install_execute_sequence
 )
 
 from cleanup import cleanup
@@ -71,6 +73,9 @@ def test_add_directory():
         assert dir_obj.basedir == None
         assert dir_obj.physical == "."
         assert dir_obj.logical == "TARGETDIR"
+        db_dir = get_directory(db, "TARGETDIR")
+        assert db_dir.get("default_dir") == "SourceDir"
+        assert db_dir.get("directory_parent") == ""
 
 
 def test_set_target_dir():
@@ -85,12 +90,40 @@ def test_set_target_dir():
         assert db_action.get("target") == str(target_dir)
 
 
-def test_add_powershell_script():
+def test_add_executable_action():
+    cleanup()
+    action_id = "RunTestScript"
+    sequence_offset = 1
+    target = "[System64Folder]\msg.exe"
+
+    with msilib_db('test.msi') as db:
+        db = db
+        add_executable_action(db, sequence_offset, action_id, target, ["*", "Testing"])
+        db_action = get_custom_action(db, action_id)
+        assert db_action.get("type") == str(34 + 17920)
+        db_sequence = get_install_execute_sequence(db, action_id)
+        assert db_sequence.get("sequence_id") == str(sequence_offset + 1500)
+
+
+def test_add_powershell_action():
+    cleanup()
+    action_id = "RunTestScript"
+    sequence_offset = 2
+
+    target = str(Path(__name__).parent.joinpath("outputs/testdest/test.ps1"))
+    with msilib_db('test.msi') as db:
+        db = db
+        add_powershel_action(db, sequence_offset, action_id, target, ["1", "2"])
+        db_action = get_custom_action(db, action_id)
+        assert db_action.get("type") == str(51 + 17920)
+        db_sequence = get_install_execute_sequence(db, action_id)
+        assert db_sequence.get("sequence_id") == str(sequence_offset + 1500)
+
+
+def test_add_property():
     cleanup()
     with msilib_db('test.msi') as db:
         db = db
-        add_powershell_script(db, "test.ps1", ["-arg1", "value1"])
-        db_action = get_custom_action(db, "test.ps1")
-        assert db_action.get("type") == "3106"
-        assert db_action.get("source") == "TARGETDIR"
-        assert db_action.get("target") == 'cmd.exe /C call powershell.exe -c "[TARGETDIR]test.ps1" -arg1 value1'
+        add_property(db, "TESTPROPERTY", "TESTVALUE")
+        db_property = get_property(db, "TESTPROPERTY")
+        assert db_property == "TESTVALUE"
