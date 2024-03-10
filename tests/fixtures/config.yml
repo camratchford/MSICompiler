@@ -1,15 +1,27 @@
 ---
 source_folder: '.\fixtures\testpack'
 destination_folder: '.\outputs\testdest'
-powershell_script: 'script.ps1'
-script_args:
-  - 1
-  - "2"
+custom_actions:
+  - name: TestAction
+    type: powershell
+    target: '[TARGETDIR]\script.ps1'
+    args:
+      - 1
+      - 2
+  - name: TestAction2
+    type: executable
+    target: 'C:\Windows\System32\msg.exe'
+    args:
+      - '*'
+      - 'Test Message'
 msi_package_path: '.\outputs\{package_name}_{package_version}.msi'
-package_name: 'TestPackage'
+package_name: TestPackage
 package_version: '1.0.0'
-company: 'RatchfordConsulting'
-manufacturer: 'RatchfordManufacturing'
-contact_email: 'camratchford@gmail.com'
-webpage: 'https://support.ratchfordconsulting.com/'
-upgrade_code: '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
+company: RatchfordConsulting
+manufacturer: RatchfordManufacturing
+properties:
+  ARPCONTACT: camratchford@gmail.com
+  ARPPRODUCTICON: '[TARGETDIR]\icon.ico'
+  ARPURLINFOABOUT: https://support.ratchfordconsulting.com/
+  ARPREADME: '[TARGETDIR]\readme.txt'
+  UpgradeCode: '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
