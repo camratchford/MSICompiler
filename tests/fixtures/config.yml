@@ -2,9 +2,9 @@
 source_folder: '.\fixtures\testpack'
 destination_folder: '.\outputs\testdest'
 custom_actions:
-  - name: TestAction
+  - name: TestAction1
     type: powershell
-    target: '[TARGETDIR]\script.ps1'
+    target: '{destination_folder}\script.ps1'
     args:
       - 1
       - 2
@@ -16,12 +16,26 @@ custom_actions:
       - 'Test Message'
 msi_package_path: '.\outputs\{package_name}_{package_version}.msi'
 package_name: TestPackage
+product_code: '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
 package_version: '1.0.0'
 company: RatchfordConsulting
 manufacturer: RatchfordManufacturing
 properties:
   ARPCONTACT: camratchford@gmail.com
-  ARPPRODUCTICON: '[TARGETDIR]\icon.ico'
+  ARPPRODUCTICON: '{destination_folder}\package-box.ico'
   ARPURLINFOABOUT: https://support.ratchfordconsulting.com/
-  ARPREADME: '[TARGETDIR]\readme.txt'
-  UpgradeCode: '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
+  ARPREADME: '{destination_folder}\README.txt'
+  UpgradeCode: '{product_code}'
+environment_variables:
+  - name: PATH
+    value: 'C:\Program Files\MyApp'
+    mode: append
+    delimiter: ';'
+  - name: MYAPP_HOME
+    value: 'C:\Program Files\MyApp'
+    mode: set
+    # no delimiter required, any entry will be ignored
+  - name: DEPRECATED_MYAPP_VAR
+    # no value required, any entry will be ignored
+    mode: remove
+    # no delimiter required, any entry will be ignored

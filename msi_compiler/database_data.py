@@ -8,6 +8,8 @@ import msilib.schema
 import msilib.sequence
 
 from msi_compiler.config import Config
+from msi_compiler.msilib_util import new_msilib_db
+from msi_compiler.custom_actions import ACTION_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +67,6 @@ def add_feature(
 def add_directory(
         db: msilib.OpenDatabase,
         cab_obj: msilib.CAB,
-
 ):
     r"""
     Add a directory
@@ -114,33 +115,17 @@ def set_target_dir(db, target_dir: str):
     db.Commit()
 
 
-def add_powershell_script(db, script_name: str, script_args: list[str]):
+def add_property(db, property_id: str, value: str):
     r"""
-    Add a CustomAction and assoicated Sequence to their respective tables.
-    The action will execute 'script_name' with its arguments 'script_args' in powershell.
-    :param db:
-    :param script_name:
-    :param script_args:
+    Adds a property to the MSI database
+    :param db: The MSI database
+    :param property_id: The property name
+    :param value: The property value
     :return:
     """
-    args = ""
-    if script_args:
-        args = " ".join([str(i) for i in script_args])
-
-    type_ = 3106 # https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-type-51
-    pwsh_line = f'powershell.exe -c "[TARGETDIR]{script_name}" {args}'
-
-    target = f"cmd.exe /C call {pwsh_line}"
-    action_id = "SCRIPTRUN"
-    customaction_data = [(action_id, type_, 'TARGETDIR', target)]
-    msilib.add_data(db, 'CustomAction', customaction_data)
+    property_data = [(property_id, value)]
+    msilib.add_data(db, 'Property', property_data)
     db.Commit()
-
-
-    sequence_id = 6400 # https://learn.microsoft.com/en-us/windows/win32/msi/installexecutesequence-table
-    # ActionID, Condition (True), Sequence
-    sequence_data = [(action_id, '1=1', sequence_id)]
-    msilib.add_data(db, 'InstallExecuteSequence', sequence_data)
 
 
 def create_msi(config: Config):
@@ -154,48 +139,36 @@ def create_msi(config: Config):
     source_folder = config.source_folder
     source_obj = Path(source_folder)
     destination_folder = config.destination_folder
-    powershell_script = config.powershell_script
-    script_args = config.script_args
 
     msi_package_path = config.msi_package_path
     package_name = config.package_name
     package_version = config.package_version
     company = config.company
-    contact_email = config.contact_email
-    webpage = config.webpage
-    upgrade_code = config.upgrade_code
+    property_data = config.properties
+    property_data['ARPSIZE'] = calculate_size(source_folder)
 
-    db = msilib.init_database(
-        msi_package_path,
-        msilib.schema,
-        package_name,
-        msilib.gen_uuid(),
-        package_version,
-        company
-    )
+    with new_msilib_db(msi_package_path, package_name, package_version, company) as db:
+        msilib.add_tables(db, msilib.sequence)
+        set_target_dir(db, destination_folder)
 
-    msilib.add_tables(db, msilib.sequence)
+        for prop, value in property_data.items():
+            add_property(db, prop, value)
 
-    property_data = [
-        ('ARPCONTACT', contact_email),
-        ('ARPURLINFOABOUT', webpage),
-        ('ARPSIZE', calculate_size(source_folder)),
-        ('ARPREADME', f"{destination_folder}\\README.txt"),
-        ('UpgradeCode', upgrade_code)
-    ]
+        cab = msilib.CAB(package_name)
+        dir_obj = add_directory(db, cab)
 
-    msilib.add_data(db, 'Property', property_data)
-    db.Commit()
 
-    cab = msilib.CAB(package_name)
-    dir_obj = add_directory(db, cab)
-    set_target_dir(db, destination_folder)
+        feature_id = "Everything"
+        file_list = [i for i in source_obj.iterdir()]
+        add_feature(db, cab, feature_id, dir_obj, file_list)
 
-    feature_id = "Everything"
-    file_list = [i for i in source_obj.iterdir()]
-    add_feature(db, cab, feature_id, dir_obj, file_list)
-    add_powershell_script(db, powershell_script, script_args)
-    db.Commit()
-    db.Close()
+        if config.custom_actions:
+            for i, action in enumerate(config.custom_actions):
+                action_type = action.get("type")
+                if action_type in ACTION_TYPES:
+                    ACTION_TYPES[action_type](db, i+1, action.get('name'), action.get('target'), action.get('args'))
+                else:
+                    # todo: raise custom warning
+                    ...
 
 
