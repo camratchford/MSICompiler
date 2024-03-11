@@ -2,4 +2,6 @@ from pathlib import Path
 
 
 def cleanup():
-    Path("test.msi").unlink(missing_ok=True)
+    # for p in Path().cwd().joinpath("outputs").iterdir():
+    #     p.unlink()
+    ...

@@ -4,20 +4,23 @@ import msilib
 from pathlib import Path
 
 
-from msi_compiler.compiler import (
+from msi_compiler.database_data import (
     calculate_size,
     add_feature,
     add_directory,
     set_target_dir,
-    add_property
+    add_property,
+    add_component,
+    add_environment_variable_action
 )
-from msi_compiler.custom_actions import add_powershel_action, add_executable_action
 from msi_compiler.msilib_util import (
     get_feature,
     get_property,
     get_custom_action,
     get_directory,
-    get_install_execute_sequence
+    get_install_execute_sequence,
+    get_component,
+    get_environment
 )
 
 from cleanup import cleanup
@@ -90,6 +93,49 @@ def test_set_target_dir():
         assert db_action.get("target") == str(target_dir)
 
 
+def test_add_property():
+    cleanup()
+    with msilib_db('test.msi') as db:
+        db = db
+        add_property(db, "TESTPROPERTY", "TESTVALUE")
+        db_property = get_property(db, "TESTPROPERTY")
+        assert db_property == "TESTVALUE"
+
+
+def test_add_compomemt():
+    cleanup()
+    with msilib_db('test.msi') as db:
+        component_id = "TEST_COMPONENT"
+        feature_id = "Everything"
+        add_component(db, component_id, feature_id)
+        component = get_component(db, component_id)
+        assert component.get("directory") == "TARGETDIR"
+        assert component.get("attributes") == "0"
+        assert component.get("condition") == "NOT REMOVE"
+        assert component.get("keypath") == ""
+
+
+def test_add_environment_variable_action():
+    cleanup()
+
+    with msilib_db('test.msi') as db:
+        db = db
+        add_environment_variable_action(db, "MYAPP_HOME", r"C:\Program Files\MyApp", "set", "")
+        env_var_row_1 = get_environment(db, "MYAPP_HOME")
+        assert env_var_row_1.get("name") == "=MYAPP_HOME"
+        assert env_var_row_1.get("value") == r"C:\Program Files\MyApp"
+
+        add_environment_variable_action(db, "MYAPP_HOME2", "", "remove", "")
+        env_var_row_2 = get_environment(db, "MYAPP_HOME2")
+        assert env_var_row_2.get("name") == "-MYAPP_HOME2"
+        assert not env_var_row_2.get("value")
+
+        add_environment_variable_action(db, "MYAPP_HOME3", "value", "append", ";")
+        env_var_row_2 = get_environment(db, "MYAPP_HOME3")
+        assert env_var_row_2.get("name") == "=MYAPP_HOME3"
+        assert env_var_row_2.get("value") == "value;[~]"
+
+
 def test_add_executable_action():
     cleanup()
     action_id = "RunTestScript"
@@ -113,17 +159,10 @@ def test_add_powershell_action():
     target = str(Path(__name__).parent.joinpath("outputs/testdest/test.ps1"))
     with msilib_db('test.msi') as db:
         db = db
-        add_powershel_action(db, sequence_offset, action_id, target, ["1", "2"])
+        add_powershell_action(db, sequence_offset, action_id, target, ["1", "2"])
         db_action = get_custom_action(db, action_id)
         assert db_action.get("type") == str(51 + 17920)
         db_sequence = get_install_execute_sequence(db, action_id)
         assert db_sequence.get("sequence_id") == str(sequence_offset + 1500)
 
 
-def test_add_property():
-    cleanup()
-    with msilib_db('test.msi') as db:
-        db = db
-        add_property(db, "TESTPROPERTY", "TESTVALUE")
-        db_property = get_property(db, "TESTPROPERTY")
-        assert db_property == "TESTVALUE"

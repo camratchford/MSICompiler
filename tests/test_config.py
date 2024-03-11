@@ -2,35 +2,115 @@
 from pathlib import Path
 from msi_compiler.config import Config
 
-config_dict = {
+config_dict_paths_expanded = {
     "source_folder": str(Path(r".\fixtures\testpack").resolve()),
-    "destination_folder": str(Path(r".\fixtures\testdest").resolve()),
-    "powershell_script": "test.ps1",
-    "script_args": [1, "2"],
-    "msi_package_path": str(Path(r".\{package_name}_{package_version}.msi").resolve()),
+    "destination_folder": str(Path(r".\outputs\testdest").resolve()),
+    "custom_actions": [
+        {
+            "name": "TestAction1",
+            "type": "powershell",
+            "target": r".\outputs\testdest\script.ps1",
+            "args": [1, 2]
+        },
+        {
+            "name": "TestAction2",
+            "type": "executable",
+            "target": r"C:\Windows\System32\msg.exe",
+            "args": ["*", "Test Message"]
+        }
+    ],
+
+    "msi_package_path": r".\outputs\{package_name}_{package_version}.msi",
     "package_name": "TestPackage",
     "package_version": "1.0.0",
     "company": "RatchfordConsulting",
     "manufacturer": "RatchfordManufacturing",
-    "contact_email": "camratchford@gmail.com",
-    "webpage": "https://support.ratchfordconsulting.com/",
-    "upgrade_code": "{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}",
+    "properties": {
+        "ARPCONTACT": "camratchford@gmail.com",
+        "ARPPRODUCTICON": r".\outputs\testdest\package-box.ico",
+        "ARPURLINFOABOUT": "https://support.ratchfordconsulting.com/",
+        "ARPREADME": r".\outputs\testdest\README.txt",
+        "UpgradeCode": "{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}"
+    },
+    "environment_variables": [
+        {
+            "name": "MYAPP_HOME",
+            "value": r"C:\Program Files\MyApp",
+            "mode": "set",
+            "delimiter": ";",
+        },
+        {
+            "name": "PATH",
+            "value": r"C:\Program Files\MyApp",
+            "mode": "append",
+        },
+        {
+            "name": "DEPRECATED_MYAPP_VAR",
+            "mode": "remove",
+        }
+    ]
+}
+
+config_dict = {
+    "source_folder": r".\fixtures\testpack",
+    "destination_folder": r".\outputs\testdest",
+    "custom_actions": [
+        {
+            "name": "TestAction1",
+            "type": "powershell",
+            "target": str(Path(r".\outputs\testdest\script.ps1").resolve()),
+            "args": [1, 2]
+        },
+        {
+            "name": "TestAction2",
+            "type": "executable",
+            "target": r"C:\Windows\System32\msg.exe",
+            "args": ["*", "Test Message"]
+        }
+    ],
+
+    "msi_package_path": r".\outputs\{package_name}_{package_version}.msi",
+    "package_name": "TestPackage",
+    "package_version": "1.0.0",
+    "company": "RatchfordConsulting",
+    "manufacturer": "RatchfordManufacturing",
+    "properties": {
+        "ARPCONTACT": "camratchford@gmail.com",
+        "ARPPRODUCTICON": str(Path(r".\outputs\testdest\package-box.ico").resolve()),
+        "ARPURLINFOABOUT": "https://support.ratchfordconsulting.com/",
+        "ARPREADME": str(Path(r".\outputs\testdest\README.txt").resolve()),
+        "UpgradeCode": "{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}"
+    },
+    "environment_variables": [
+        {
+            "name": "MYAPP_HOME",
+            "value": r"C:\Program Files\MyApp",
+            "mode": "set",
+            "delimiter": ";",
+        },
+        {
+            "name": "PATH",
+            "value": r"C:\Program Files\MyApp",
+            "mode": "append",
+        },
+        {
+            "name": "DEPRECATED_MYAPP_VAR",
+            "mode": "remove"
+        },
+    ]
 }
 
 
 def test_config_dict():
-    config = Config(**config_dict)
+    config = Config(**config_dict_paths_expanded)
     assert config.source_folder == str(Path(r".\fixtures\testpack").resolve())
-    assert config.destination_folder == str(Path(r".\fixtures\testdest").resolve())
-    assert config.powershell_script == "test.ps1"
-    assert config.script_args == [1, "2"]
-    assert config.msi_package_path == str(Path(r".\TestPackage_1.0.0.msi").resolve())
+    assert config.destination_folder == str(Path(r".\outputs\testdest").resolve())
+    assert config.custom_actions == config_dict_paths_expanded.get('custom_actions')
+    assert config.msi_package_path == r".\outputs\TestPackage_1.0.0.msi"
     assert config.package_version == "1.0.0"
     assert config.company == "RatchfordConsulting"
     assert config.manufacturer == "RatchfordManufacturing"
-    assert config.contact_email == "camratchford@gmail.com"
-    assert config.webpage == "https://support.ratchfordconsulting.com/"
-    assert config.upgrade_code == "{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}"
+    assert config.properties == config_dict_paths_expanded.get('properties')
     assert config.package_name == "TestPackage"
 
 
@@ -38,14 +118,11 @@ def test_config_yaml():
     config_path = str(Path(r".\fixtures\config.yml").resolve())
     config = Config.from_file(config_path)
     assert config.source_folder == str(Path(r".\fixtures\testpack").resolve())
-    assert config.destination_folder == str(Path(r".\fixtures\testdest").resolve())
-    assert config.powershell_script == "script.ps1"
-    assert config.script_args == [1, "2"]
-    assert config.msi_package_path == str(Path(r".\TestPackage_1.0.0.msi").resolve())
+    assert config.destination_folder == str(Path(r".\outputs\testdest").resolve())
+    assert config.custom_actions == config_dict.get('custom_actions')
+    assert config.msi_package_path == r".\outputs\TestPackage_1.0.0.msi"
     assert config.package_version == "1.0.0"
     assert config.company == "RatchfordConsulting"
     assert config.manufacturer == "RatchfordManufacturing"
-    assert config.contact_email == "camratchford@gmail.com"
-    assert config.webpage == "https://support.ratchfordconsulting.com/"
-    assert config.upgrade_code == "{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}"
+    assert config.properties == config_dict.get('properties')
     assert config.package_name == "TestPackage"
