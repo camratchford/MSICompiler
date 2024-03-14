@@ -86,7 +86,8 @@ def test_main():
 
 
 def test_install():
-    run_powershell(r"Remove-Item -Recurse -Force -Path C:\Users\Cam\PycharmProjects\MSICompiler\tests\outputs")
+    outputs_path = str(Path(r".\outputs").resolve())
+    run_powershell(rf"Remove-Item -Recurse -Force -Path {outputs_path}")
     config_path = str(Path(r".\fixtures\config.yml").resolve())
     config = Config.from_file(config_path)
     main(config)
