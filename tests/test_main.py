@@ -78,13 +78,6 @@ def set_user_env_var(var_name: str, value: str):
     run_powershell(fr"Set-ItemProperty -Path HKCU:\\environment -Name {var_name} -Value {value}")
 
 
-def test_main():
-    cleanup()
-    config = Config(**config_dict)
-    main(config)
-    assert Path(config.msi_package_path).exists()
-
-
 def test_install():
     outputs_path = str(Path(r".\outputs").resolve())
     run_powershell(rf"Remove-Item -Recurse -Force -Path {outputs_path}")
@@ -92,7 +85,7 @@ def test_install():
     config = Config.from_file(config_path)
     main(config)
     sleep(2)
-    set_user_env_var('DEPRICATED_MYAPP_VAR', 'Obsolete Information')
+    set_user_env_var('DEPRECATED_MYAPP_VAR', 'Obsolete Information')
     if Path(config.msi_package_path).exists():
         log_path = str(Path(r".\outputs\install.log").resolve())
         powershell_path = r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"

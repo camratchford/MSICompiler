@@ -11,10 +11,15 @@ It is written in Python and uses the `msilib` library to create the MSI package.
 
 - YAML-based configuration
 - Placing a directory full of files into a specified location
-- Custom actions
+  - Contents of directory (but not the directory itself) are removed on uninstall
+- Custom install / uninstall actions
   - Powershell action (Briefly shows the powershell window before closing)
-  - Executable action (Relative paths are relative to the destination folder) 
+  - Executable action (Relative paths are relative to the destination folder)
 - Environment variables
+  - Set
+  - Append
+  - Remove
+- Package appears in Add/Remove Programs![Add/Remove Programs](./extras/PackageScreenshot.png)
 
 ## Limitations
 
@@ -25,7 +30,7 @@ It is written in Python and uses the `msilib` library to create the MSI package.
 - Many of the features that MSI packages support are not supported by MSICompiler
   - Registry keys
   - Services
-  - Uninstall actions
+
 
 > See the Future Plans section for more features lacking in MSICompiler
 
@@ -41,26 +46,33 @@ Below is a sample configuration file:
 ---
 source_folder: '.\fixtures\testpack'
 destination_folder: '.\outputs\testdest'
-custom_actions:
-  - name: TestAction1
+custom_install_actions:
+  - name: TestInstallAction1
     type: powershell
     target: '{destination_folder}\script.ps1'
     args:
       - 1
       - 2
-  - name: TestAction2
+  - name: TestInstallAction2
     type: executable
     target: 'C:\Windows\System32\msg.exe'
     args:
       - '*'
       - 'Test Message'
+custom_uninstall_actions:
+  - name: TestUninstallAction1
+    type: executable
+    target: 'C:\Windows\System32\msg.exe'
+    args:
+      - '*'
+      - 'Uninstall Test Message'
 msi_package_path: '.\outputs\{package_name}_{package_version}.msi'
 package_name: TestPackage
 product_code: '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
 package_version: '1.0.0'
 company: RatchfordConsulting
 manufacturer: RatchfordManufacturing
-properties:
+msi_properties:
   ARPCONTACT: camratchford@gmail.com
   ARPPRODUCTICON: '{destination_folder}\package-box.ico'
   ARPURLINFOABOUT: https://support.ratchfordconsulting.com/
@@ -79,6 +91,7 @@ environment_variables:
     # no value required, any entry will be ignored
     mode: remove
     # no delimiter required, any entry will be ignored
+
 ```
 
 To create the MSI package, you can use the following command:
@@ -90,11 +103,10 @@ MSICompiler.exe -c "config.yaml"
 To install the msi package, you can use the following command:
 ```powershell
 # The full path must be provided if executing the MSI with msiexec
-msiexec /i /qn "$(Resolve-Path TestPackage_1.0.0.msi)" -log "install.log"
+msiexec /i /qn "$(Resolve-Path ./outputs/TestPackage_1.0.0.msi)" -log "install.log"
 
 # This method relies on file extension handlers, but it is generally safe to assume that .msi is mapped correctly
-# Assumes that the msi package is in the current directory
-./TestPackage_1.0.0.msi
+./outputs/TestPackage_1.0.0.msi
 ```
 
 To uninstall the msi package, you can use the following command:
@@ -106,9 +118,6 @@ msiexec /X'{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}' /qn -log "uninstall.log"
 ## Future Plans
 
 > Feel free to submit a feature request as an issue
-- Uninstall actions
-  - Populate the 'uninstall' registry key with the UninstallString
-  - Allow for custom actions to be run on uninstall
 - Conditional install
 - Logging / Better error handling
 - Registry keys
