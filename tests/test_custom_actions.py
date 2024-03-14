@@ -1,7 +1,7 @@
 
 from pathlib import Path
 
-from msi_compiler.custom_actions import add_executable_action, add_powershell_action
+from msi_compiler.custom_actions import add_executable_install_action, add_powershell_install_action
 from cleanup import cleanup
 from msilib_objs import msilib_db
 
@@ -18,7 +18,7 @@ def test_add_executable_action():
 
     with msilib_db('test.msi') as db:
         db = db
-        add_executable_action(db, action_id, target, ["*", "Testing"])
+        add_executable_install_action(db, action_id, target, ["*", "Testing"])
         db_action = get_custom_action(db, action_id)
         assert db_action.get("type") == str(34)
         db_sequence = get_install_execute_sequence(db, action_id)
@@ -32,7 +32,7 @@ def test_add_powershell_action():
     target = str(Path(__name__).parent.joinpath("outputs/testdest/test.ps1"))
     with msilib_db('test.msi') as db:
         db = db
-        add_powershell_action(db, action_id, target, ["1", "2"])
+        add_powershell_install_action(db, action_id, target, ["1", "2"])
         db_action = get_custom_action(db, action_id)
         assert db_action.get("type") == str(3106)
         db_sequence = get_install_execute_sequence(db, action_id)
