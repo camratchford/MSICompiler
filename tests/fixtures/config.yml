@@ -1,26 +1,33 @@
 ---
 source_folder: '.\fixtures\testpack'
 destination_folder: '.\outputs\testdest'
-custom_actions:
-  - name: TestAction1
+custom_install_actions:
+  - name: TestInstallAction1
     type: powershell
     target: '{destination_folder}\script.ps1'
     args:
       - 1
       - 2
-  - name: TestAction2
+  - name: TestInstallAction2
     type: executable
     target: 'C:\Windows\System32\msg.exe'
     args:
       - '*'
       - 'Test Message'
+custom_uninstall_actions:
+  - name: TestUninstallAction1
+    type: executable
+    target: 'C:\Windows\System32\msg.exe'
+    args:
+      - '*'
+      - 'Uninstall Test Message'
 msi_package_path: '.\outputs\{package_name}_{package_version}.msi'
 package_name: TestPackage
 product_code: '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
 package_version: '1.0.0'
 company: RatchfordConsulting
 manufacturer: RatchfordManufacturing
-properties:
+msi_properties:
   ARPCONTACT: camratchford@gmail.com
   ARPPRODUCTICON: '{destination_folder}\package-box.ico'
   ARPURLINFOABOUT: https://support.ratchfordconsulting.com/
