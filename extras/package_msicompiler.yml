@@ -1,24 +1,23 @@
 ---
 # Assumes we are in MSICompiler/extras
-source_folder: '..\package\'
-destination_folder: '[LocalAppDataFolder]\MSICompiler'
-custom_actions: []
-msi_package_path: '..\dist\'
+source_folder: '.\package\'
+destination_folder: 'C:\ProgramFiles\MSICompiler'
+msi_package_path: '.\dist\{package_name}_{package_version}.msi'
 package_name: MSICompiler
 package_version: '1.0.0'
-company: https://github.com/camratchford/MSICompiler
-manufacturer: https://github.com/camratchford/MSICompiler
+company: https://github.com/camratchford
+manufacturer: '{company}'
 product_code: '{23EFED8A-980A-4B5C-9257-5841B48668A3}'
-properties:
+msi_properties:
   ARPCONTACT: camratchford@gmail.com
-  ARPPRODUCTICON: '[TARGETDIR]\package-box.ico'
-  ARPURLINFOABOUT: https://github.com/camratchford/MSICompiler/blob/master/README.md
-  ARPREADME: '[TARGETDIR]\README.md'
+  ARPPRODUCTICON: '{destination_folder}\package-box.ico'
+  ARPURLINFOABOUT: '{company}/MSICompiler/blob/master/README.md'
+  ARPREADME: '{destination_folder}\README.md'
   UpgradeCode: '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
-  UninstallString: '[SystemFolder]\msiexec.exe /x "[ProductCode]"'
+  UninstallString: 'C:\Windows\System32\msiexec.exe /X"{23EFED8A-980A-4B5C-9257-5841B48668A3}"'
 environment_variables:
   - name: PATH
-    value: '[TARGETDIR]'
+    value: 'C:\ProgramFiles\MSICompiler'
     mode: append
     delimiter: ';'
 

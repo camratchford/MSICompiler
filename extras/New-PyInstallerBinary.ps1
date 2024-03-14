@@ -1,6 +1,6 @@
 $CWD = Split-Path -Path $($MyInvocation.MyCommand.Source) -Parent
 $ProjectRoot = Split-Path -Path $CWD -Parent
-$VenvPath = Join-Path -Path $ProjectRoot ".venv"
+$VenvPath = Join-Path -Path $CWD "venv"
 
 $PyInstallerArgs = @(
     "-y",
@@ -10,10 +10,10 @@ $PyInstallerArgs = @(
     "--icon=$CWD\package-box.ico",
     "--name=MSICompiler.exe",
     "--paths=$ProjectRoot\msi_compiler",
-    "--collect-submodules=msi_compiler",
+#    "--collect-submodules=msi_compiler",
      "$ProjectRoot\cli.py"
 )
+$Args = $PyInstallerArgs -join " "
 
-write-host "$VenvPath\Scripts\Pyinstaller.exe"
-
-Start-Process -Wait -NoNewWindow -FilePath "$VenvPath\Scripts\Pyinstaller.exe" -ArgumentList $PyInstallerArgs
+Invoke-Expression "$VenvPath\Scripts\activate"
+Invoke-Expression "Pyinstaller $Args"

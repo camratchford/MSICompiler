@@ -7,7 +7,7 @@ Copy-Item -Path $MSICompilerPath -Destination $OutputPath -Force
 Copy-Item -Path $CWD/package-box.ico -Destination $OutputPath -Force
 Copy-Item -Path $ProjectRoot/README.md -Destination $OutputPath -Force
 
-$MSICompilerConfig = Join-Path -Path $ProjectRoot "msi_compiler/package_msicompiler.yml"
+$MSICompilerConfig = Join-Path -Path $ProjectRoot "extras/package_msicompiler.yml"
 $MSICompilerArgs = @(
     "-c $MSICompilerConfig"
 )

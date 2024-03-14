@@ -1,10 +1,28 @@
-import msilib
-from pathlib import Path
 
+from pathlib import Path
+from typing import Literal
 import yaml
 
 from msi_compiler.exceptions import ConfigPropertyError, ConfigPropertyWarning
-from msi_compiler.types import PathProperties, NullableProperties, is_f_string_template
+
+PathProperties = Literal[
+    "source_folder",
+    "destination_folder",
+    "msi_package_path",
+    "target",
+    "ARPPRODUCTICON",
+    "ARPREADME"
+]
+
+NullableProperties = Literal[
+    'custom_install_actions',
+    'custom_uninstall_actions',
+    'environment_variables',
+    'msi_properties'
+]
+
+def is_f_string_template(s: str) -> bool:
+    return isinstance(s, str) and "{" in s and "}" in s
 
 
 class Config:
