@@ -19,7 +19,9 @@ It is written in Python and uses the `msilib` library to create the MSI package.
   - Set
   - Append
   - Remove
-- Package appears in Add/Remove Programs![Add/Remove Programs](./extras/PackageScreenshot.png)
+- Package appears in Add/Remove Programs
+
+![Add/Remove Programs](./extras/PackageScreenshot.png)
 
 ## Limitations
 
