@@ -1,7 +1,7 @@
 ---
 # Assumes we are in MSICompiler/extras
 source_folder: '.\package\'
-destination_folder: 'C:\ProgramFiles\MSICompiler'
+destination_folder: 'C:\Program Files\MSICompiler'
 msi_package_path: '.\dist\{package_name}_{package_version}.msi'
 package_name: MSICompiler
 package_version: '1.0.1'
@@ -17,7 +17,7 @@ msi_properties:
   UninstallString: 'C:\Windows\System32\msiexec.exe /X"{23EFED8A-980A-4B5C-9257-5841B48668A3}"'
 environment_variables:
   - name: PATH
-    value: 'C:\ProgramFiles\MSICompiler'
+    value: 'C:\Program Files\MSICompiler'
     mode: append
     delimiter: ';'
 

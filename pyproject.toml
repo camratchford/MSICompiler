@@ -5,12 +5,19 @@ version = "1.0.1"
 description = "MsiCompiler - It Compiles MSI packages"
 readme = "README.md"
 classifiers = [
-  "Development Status :: 1 - Testing",
-  "License :: OSI Approved :: MIT No Attribution License (MIT-0)",
-  "Environment :: Console",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: Implementation :: CPython",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Environment :: Console",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: System :: Installation/Setup",
+    "Topic :: System :: Software Distribution",
 ]
 dependencies = [
     "altgraph==0.17.4",
