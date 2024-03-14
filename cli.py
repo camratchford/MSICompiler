@@ -27,7 +27,16 @@ logger = logging.getLogger(__name__)
     help="The location of the yaml configuration file",
     required=False,
 )
-def run(config_file: str):
+@click.option(
+    "--uuid",
+    help="Prints a new UUID to stdout (for use as product code / upgrade code)",
+    is_flag=True,
+)
+def run(config_file: str, uuid: bool):
+    if uuid:
+        import msilib
+        print(msilib.gen_uuid())
+        return
     config = Config.from_file(config_file)
     main(config)
 

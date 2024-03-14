@@ -1,9 +1,10 @@
-
+import msilib
 from pathlib import Path
 
 import yaml
 
 from msi_compiler.exceptions import ConfigPropertyError, ConfigPropertyWarning
+from msi_compiler.types import PathProperties, NullableProperties, is_f_string_template
 
 
 class Config:
@@ -12,48 +13,33 @@ class Config:
     """
     source_folder: str = ""
     destination_folder: str = ""
-    powershell_script: str = ""
-    script_args: list = []
+    custom_install_actions: list[dict] = [{}]
+    custom_uninstall_actions: list[dict] = [{}]
     msi_package_path: str = ""
     package_name: str = ""
+    product_code: str = ""
     package_version: str = ""
     company: str = ""
     manufacturer: str = ""
-    contact_email: str = ""
-    webpage: str = ""
-    upgrade_code: str = '{39CFB886-7C1D-4469-A9C1-0C578E1C36D8}'
-    path_attrs = [
-        "source_folder",
-        "destination_folder",
-        "msi_package_path",
-    ]
+    msi_properties = {}
+    environment_variables: list[dict] = [{}]
 
     def __init__(self, **kwargs):
         if kwargs is None:
             raise ConfigPropertyError("Config cannot be empty")
-
-        if not all(kwargs.values()):
-            raise ConfigPropertyError("All configuration values must be specified")
+        for k, v in kwargs.items():
+            if not hasattr(self, k):
+                raise ConfigPropertyWarning(f"Config does not contain property '{k}', this will be ignored")
+            if k and (not v and not isinstance(k, NullableProperties)):
+                raise ConfigPropertyError(f"Config property '{k}' cannot be empty")
 
         self.__dict__.update(kwargs)
         self.format_string_attrs()
-        self.make_paths_absolute()
-
-    def make_paths_absolute(self):
-        r"""
-        Converts relative paths to absolute paths
-        """
-        for attr, value in self.__dict__.items():
-            try:
-                if attr in self.path_attrs and not Path(value).is_absolute():
-                    self.__dict__[attr] = str(Path(value).resolve())
-            except Exception as e:
-                # Some of these things aren't paths, and that's okay
-                ...
+        self.setup()
 
     def format_string_attrs(self):
         r"""
-        Processes class attributes for strings that contain Python string.format() character '{'
+        Processes class properties for strings that contain Python string.format() character '{'
         Replaces the format variable with the corresponding value from the class's __dict__ attribute.
 
         Example:
@@ -62,18 +48,38 @@ class Config:
             package_version: '1.0.0'
             msi_package_path: 'C:\Users\Cam\MSICompiler\tests\{package_name}_{package_version}.msi'
 
-            # Resulting class attributes
+            # Resulting class properties
             config.package_name = 'TestPackage'
             config.package_version = '1.0.0'
             config.msi_package_path = 'C:\Users\Cam\MSICompiler\tests\TestPackage_1.0.0.msi'
         """
-        for attr, value in self.__dict__.items():
-            if isinstance(value, str) and '{' in value:
+        self.__dict__ = self.format_strings_in_dict(self.__dict__)
+        self.msi_properties = self.format_strings_in_dict(self.msi_properties)
+        self.custom_install_actions = [
+            self.format_strings_in_dict(action) for action in self.custom_install_actions
+        ]
+        self.custom_uninstall_actions = [
+            self.format_strings_in_dict(action) for action in self.custom_uninstall_actions
+        ]
+
+    def format_strings_in_dict(self, d: dict):
+        """
+        Processes a dictionary for strings that contain Python string.format() character '{',
+        using the class's __dict__ as supplied values.
+        If the property appears in msi_compiler.types.PathProperties, the value is converted to a Path object and resolved.
+        :param d: The dictionary to process
+        :return: The dictionary, after formatting any strings that contain Python string.format() character '{'
+        """
+        for k, v in d.items():
+            if is_f_string_template(v):
                 try:
-                    self.__dict__[attr] = value.format(**self.__dict__)
-                except Exception as e:
-                    # We don't care if it works for everything
-                    ...
+                    v = v.format(**self.__dict__)
+                except:
+                    pass
+            if k in PathProperties.__args__:
+                v = str(Path(v).resolve())
+            d[k] = v
+        return d
 
     @classmethod
     def from_dict(cls, config_dict: dict):
@@ -111,5 +117,16 @@ class Config:
 
             return cls.from_dict(config_dict)
         raise ConfigPropertyError(f"Config file [{config_file_path}] not found or invalid extension used")
+
+    def setup(self):
+        """
+        Executes various setup tasks:
+        - Creates the directory structure for outputs if it does not exist
+        :return:
+        """
+
+        if not Path(self.destination_folder).exists():
+            Path(self.destination_folder).mkdir(parents=True)
+
 
 

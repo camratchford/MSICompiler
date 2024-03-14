@@ -7,9 +7,6 @@ import msilib
 import msilib.schema
 import msilib.sequence
 
-from msi_compiler.config import Config
-from msi_compiler.msilib_util import new_msilib_db
-from msi_compiler.custom_actions import ACTION_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +81,7 @@ def add_directory(
         'SourceDir'
     )
 
+
     return dir_obj
 
 
@@ -94,6 +92,7 @@ def set_target_dir(db, target_dir: str):
     :param target_dir: The directory in which the source directory will be placed as part of the 'INSTALL' action
     :return:
     """
+    ...
     action_data = [(
         'SetTargetDirAction',
         51,
@@ -128,47 +127,84 @@ def add_property(db, property_id: str, value: str):
     db.Commit()
 
 
-def create_msi(config: Config):
-    r"""
-    Creates an MSI package using the parameters contained in the config object
-    :param config: A Config object
+def add_component(db, component_id: str, feature_id: str):
+    # https://learn.microsoft.com/en-us/windows/win32/msi/component-table
+    # Create component in component table
+
+    # https://learn.microsoft.com/en-us/windows/win32/msi/writeenvironmentstrings-action
+    component_guid = msilib.gen_uuid()
+    condition = "NOT REMOVE"
+    component_data = [(
+        component_id,
+        component_guid,
+        "TARGETDIR",
+        0,
+        condition,
+        None
+    )]
+    msilib.add_data(db, 'Component', component_data)
+    db.Commit()
+
+    # https://learn.microsoft.com/en-us/windows/win32/msi/featurecomponents-table
+    # Add component to the FeatureComponents table
+    feature_component_data = [(
+        feature_id,
+        component_id,
+    )]
+    msilib.add_data(db, 'FeatureComponents', feature_component_data)
+    db.Commit()
+
+    # https://learn.microsoft.com/en-us/windows/win32/msi/publishcomponent-table
+    # Add component to the PublishComponent table
+    # 1033, english
+    publish_component_data = [(
+        component_guid,
+        1033,
+        component_id,
+        None,
+        feature_id
+    )]
+    msilib.add_data(db, 'PublishComponent', publish_component_data)
+    db.Commit()
+
+
+def add_environment_variable_action(
+        db,
+        name: str,
+        value: str = "",
+        mode: str = "add",
+        delimiter: str = ";"
+):
+    """
+    Adds a custom action to set an environment variable
+    :param db:
+    :param name:
+    :param value:
+    :param mode:
+    :param :delimiter:
     :return:
     """
 
-    # https://willpittman.net:8080/index.php?title=Python_msilib_basics
-    source_folder = config.source_folder
-    source_obj = Path(source_folder)
-    destination_folder = config.destination_folder
-
-    msi_package_path = config.msi_package_path
-    package_name = config.package_name
-    package_version = config.package_version
-    company = config.company
-    property_data = config.properties
-    property_data['ARPSIZE'] = calculate_size(source_folder)
-
-    with new_msilib_db(msi_package_path, package_name, package_version, company) as db:
-        msilib.add_tables(db, msilib.sequence)
-        set_target_dir(db, destination_folder)
-
-        for prop, value in property_data.items():
-            add_property(db, prop, value)
-
-        cab = msilib.CAB(package_name)
-        dir_obj = add_directory(db, cab)
+    # https://learn.microsoft.com/en-us/windows/win32/msi/environment-table
+    # Create environment variable in Environment table
+    name_map = {
+        "set": f"={name}",
+        "append": f"={name}",
+        "remove": f"-{name}"
+    }
+    value_map = {
+        "set": f"{value}",
+        "append": f"{value}{delimiter}[~]",
+        "remove": f"{value}"
+    }
+    component_id = f"ENV_{name}_Component"
+    feature_id = "Everything"
+    add_component(db, component_id, feature_id)
+    property_data = [(f"ENV_{name}*", name_map.get(mode), value_map.get(mode), component_id)]
+    msilib.add_data(db, 'Environment', property_data)
+    db.Commit()
 
 
-        feature_id = "Everything"
-        file_list = [i for i in source_obj.iterdir()]
-        add_feature(db, cab, feature_id, dir_obj, file_list)
 
-        if config.custom_actions:
-            for i, action in enumerate(config.custom_actions):
-                action_type = action.get("type")
-                if action_type in ACTION_TYPES:
-                    ACTION_TYPES[action_type](db, i+1, action.get('name'), action.get('target'), action.get('args'))
-                else:
-                    # todo: raise custom warning
-                    ...
 
 
