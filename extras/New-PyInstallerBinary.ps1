@@ -7,7 +7,7 @@ $PyInstallerArgs = @(
     "--clean",
     "--console",
     "--onefile",
-    "--icon=$CWD\installer_icon.png",
+    "--icon=$CWD\package-box.ico",
     "--name=MSICompiler.exe",
     "--paths=$ProjectRoot\msi_compiler",
     "--collect-submodules=msi_compiler",
